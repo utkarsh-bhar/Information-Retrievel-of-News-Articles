@@ -44,7 +44,7 @@ public class FinancialTimesLtdParser {
 				String line;
 				
 				while((line = br.readLine()) != null) {
-					model = null;
+					model = new FinancialTimesLtdModel();
 					line = line.trim();
 					model = buildModelFromLine(line, model);
 				}
@@ -63,7 +63,7 @@ public class FinancialTimesLtdParser {
         if(line.contains(DOC_END)){
         	return model;
         } else if (line.contains(DOC_NO_START)){
-            model.setDocNo(getStringFromTags(line, "docno"));
+        	model.setDocNo(getStringFromTags(line, "doc_no"));
         } else if (line.equals(HEADLINE_START)){
             headlineFlag = true;
         } else if(line.contains(HEADLINE_END)){
@@ -105,24 +105,39 @@ public class FinancialTimesLtdParser {
 	}
 	
 	private static String getStringFromTags(String line, String field){
+		String start_tag = "";
+		String end_tag = "";
+		
         switch (field){
             case "doc_id":
-                return line.replaceAll(TEXT_START, "")
-                		.replaceAll(TEXT_END, "");
+            	start_tag = TEXT_START;
+            	end_tag = TEXT_END;
+            	break;
             case "doc_no":
-                return line.replaceAll(DOC_NO_START, "")
-                		.replaceAll(DOC_NO_END, "");
+              	start_tag = DOC_NO_START;
+            	end_tag = DOC_NO_END;
+            	break;
             case "text":
-                return line.replaceAll(TEXT_START, "")
-                		.replaceAll(TEXT_END, "");
+              	start_tag = TEXT_START;
+            	end_tag = TEXT_END;
+            	break;
             case "by_line":
-                return line.replaceAll(BYLINE_START, "")
-                		.replaceAll(BYLINE_END, "");
+              	start_tag = BYLINE_START;
+            	end_tag = BYLINE_END;
+            	break;
             case "headline":
-                return line.replaceAll(HEADLINE_START, "")
-                		.replaceAll(HEADLINE_END, "");
+              	start_tag = HEADLINE_START;
+            	end_tag = HEADLINE_END;
+                break;
             default:
-                return null;
+                start_tag = "";
+                end_tag = "";
         }
+        
+        if (start_tag.isEmpty()) {
+        	return null;
+        }
+        
+        return line.replace(start_tag, "").replace(end_tag, "");
     }
 }

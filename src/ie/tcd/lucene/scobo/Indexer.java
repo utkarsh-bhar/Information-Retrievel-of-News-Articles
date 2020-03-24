@@ -18,16 +18,16 @@ import ie.tcd.lucene.scobo.analyzers.AnalyzerHelper;
 import ie.tcd.lucene.scobo.parsers.ContentParser;
 
 public class Indexer {
-	private static Logger logger = Logger.getLogger(Indexer.class.getName());
+	private static Logger LOGGER = Logger.getLogger(Indexer.class.getName());
 	
 	public static void main(String[] args) throws Exception {
 		Path currentRelativePath = Paths.get("");
 		String s = currentRelativePath.toAbsolutePath().toString();
-		logger.info("Current relative path is: " + s);
+		LOGGER.info("Current relative path is: " + s);
 
 		String indexPath = null;
 		String analyzerType = null;
-		String sourceFile = null;
+		String sourceDir = null;
 		String scoring = null;
 		
 		for (int i = 0; i < args.length; i++) {
@@ -37,9 +37,9 @@ public class Indexer {
 			} else if ("-analyzer".equals(args[i])) {
 				analyzerType = args[i + 1];
 				i++;
-			} else if ("-document".equals(args[i])) {
+			} else if ("-documents".equals(args[i])) {
 				if (args[i + 1] != null || !args[i + 1].equals(""))
-					sourceFile = args[i + 1];
+					sourceDir = args[i + 1];
 				else
 					throw new RuntimeException("Must specify CRAN source file.");
 				i++;
@@ -52,11 +52,11 @@ public class Indexer {
 			}
 		}
 		
-		ContentParser contentParser = new ContentParser(sourceFile);
-		contentParser.loadContentFile();
-		List<Document> docs = contentParser.getDocuments();
+		ContentParser contentParser = new ContentParser(sourceDir);
+		contentParser.loadContentFiles();
+		List<Document> financialTimeLtdDocs = contentParser.getFinancialTimesLtdDocs();
 		
-		logger.info("Loaded Content");
+		LOGGER.info("Loaded data");
 		
 		Analyzer indexAnalyzer = AnalyzerHelper.getAnalyzer(analyzerType); 
 		Similarity similarityScorer = AnalyzerHelper.getSimilarity(scoring);
@@ -66,12 +66,13 @@ public class Indexer {
 		
 		// Load indexes to path
 		try (IndexWriter indexWriter = new IndexWriter(indexDir, config)) {
-			indexWriter.addDocuments(docs);
+			indexWriter.addDocuments(financialTimeLtdDocs);
+			indexWriter.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
-		logger.info("Successfully indexed (" + docs.size() + ") documents.");
+		LOGGER.info("Indexing Complete");
 	}
 	
 	private static IndexWriterConfig createIndexWriterConfig(Analyzer analyzer, IndexWriterConfig.OpenMode openMode, Similarity simiarityScorer) throws Exception {
