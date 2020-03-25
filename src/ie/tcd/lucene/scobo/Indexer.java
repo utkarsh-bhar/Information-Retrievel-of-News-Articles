@@ -51,12 +51,20 @@ public class Indexer {
 				i++;
 			}
 		}
+
+		// Load all documents
 		
 		ContentParser contentParser = new ContentParser(sourceDir);
-		contentParser.loadContentFiles();
-		List<Document> financialTimeLtdDocs = contentParser.getFinancialTimesLtdDocs();
 		
-		LOGGER.info("Loaded data");
+		contentParser.loadContentFiles();
+		
+		List<Document> laTimesDocs = contentParser.getLaTimesDocs();
+		List<Document> financialTimesLtdDocs = contentParser.getFinancialTimesLtdDocs();
+		
+		LOGGER.info("Loaded all documents");
+		
+		
+		// Configure analyzer, scorer, and index config
 		
 		Analyzer indexAnalyzer = AnalyzerHelper.getAnalyzer(analyzerType); 
 		Similarity similarityScorer = AnalyzerHelper.getSimilarity(scoring);
@@ -64,9 +72,14 @@ public class Indexer {
 		IndexWriterConfig config = createIndexWriterConfig(indexAnalyzer, IndexWriterConfig.OpenMode.CREATE, similarityScorer);
 		Directory indexDir = FSDirectory.open(Paths.get(indexPath));
 		
+		
 		// Load indexes to path
+		
+		LOGGER.info("Started Indexing...");
+		
 		try (IndexWriter indexWriter = new IndexWriter(indexDir, config)) {
-			indexWriter.addDocuments(financialTimeLtdDocs);
+			indexWriter.addDocuments(financialTimesLtdDocs);
+			indexWriter.addDocuments(laTimesDocs);
 			indexWriter.close();
 		} catch (IOException e) {
 			e.printStackTrace();

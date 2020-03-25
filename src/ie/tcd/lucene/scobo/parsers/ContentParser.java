@@ -53,9 +53,17 @@ public class ContentParser {
 	}
 
 	
-	public void loadContentFiles() throws IOException {		
-		System.out.println("loading financial times documents");
-		Path docDir = Paths.get(this.sourceDir + "/ft");
+	public void loadContentFiles() throws IOException {
+		LOGGER.info("Loading documents");
+		
+		Path docDir = Paths.get(this.sourceDir + "/latimes");
+		List<String> laTimesFiles = getFileNamesFromDirTree(docDir);
+		new LATimesParser();
+		this.laTimesDocs = LATimesParser.loadDocuments(laTimesFiles);
+		
+		System.gc();
+		
+		docDir = Paths.get(this.sourceDir + "/ft");
 		List<String> financialTimesLtdFiles = getFileNamesFromDirTree(docDir);
 		new FinancialTimesLtdParser();
 		this.financialTimesLtdDocs = FinancialTimesLtdParser.loadDocuments(financialTimesLtdFiles);	
