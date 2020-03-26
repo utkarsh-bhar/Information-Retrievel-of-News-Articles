@@ -53,7 +53,6 @@ public class Indexer {
 		}
 
 		// Load all documents
-		
 		ContentParser contentParser = new ContentParser(sourceDir);
 		
 		contentParser.loadContentFiles();
