@@ -60,6 +60,7 @@ public class Indexer {
 		
 		List<Document> laTimesDocs = contentParser.getLaTimesDocs();
 		List<Document> financialTimesLtdDocs = contentParser.getFinancialTimesLtdDocs();
+		List<Document> fbisDocs = contentParser.getFbisDocs();
 		
 		LOGGER.info("Loaded all documents");
 		
@@ -80,6 +81,8 @@ public class Indexer {
 		try (IndexWriter indexWriter = new IndexWriter(indexDir, config)) {
 			indexWriter.addDocuments(financialTimesLtdDocs);
 			indexWriter.addDocuments(laTimesDocs);
+			indexWriter.addDocuments(fbisDocs);
+			
 			indexWriter.close();
 		} catch (IOException e) {
 			e.printStackTrace();
