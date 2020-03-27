@@ -1,9 +1,6 @@
 package ie.tcd.lucene.scobo.parsers;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,8 +13,6 @@ import org.apache.lucene.document.TextField;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-
-import ie.tcd.lucene.scobo.models.FinancialTimesLtdModel;
 
 public class FinancialTimesLtdParser {
 	private static Logger LOGGER = Logger.getLogger(FinancialTimesLtdParser.class.getName());

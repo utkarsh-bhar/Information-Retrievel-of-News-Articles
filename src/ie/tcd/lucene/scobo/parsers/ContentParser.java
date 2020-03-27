@@ -52,7 +52,9 @@ public class ContentParser {
 		this.sourceDir = sourceDir;
 	}
 
-	
+	/*
+	 * Load all newspaper articles
+	 */
 	public void loadContentFiles() throws IOException {
 		LOGGER.info("Loading documents");
 		
@@ -61,12 +63,15 @@ public class ContentParser {
 		new LATimesParser();
 		this.laTimesDocs = LATimesParser.loadDocuments(laTimesFiles);
 		
-		System.gc();
-		
 		docDir = Paths.get(this.sourceDir + "/ft");
 		List<String> financialTimesLtdFiles = getFileNamesFromDirTree(docDir);
 		new FinancialTimesLtdParser();
-		this.financialTimesLtdDocs = FinancialTimesLtdParser.loadDocuments(financialTimesLtdFiles);	
+		this.financialTimesLtdDocs = FinancialTimesLtdParser.loadDocuments(financialTimesLtdFiles);
+		
+		docDir = Paths.get(this.sourceDir + "/fbis");
+		List<String> fbisFiles = getFileNamesFromDirTree(docDir);
+		new FbisParser();
+		this.fbisDocs = FbisParser.loadDocuments(fbisFiles);
 	}
 	
 	private static List<String> getFileNamesFromDirTree(Path rootDir){

@@ -17,7 +17,7 @@ import org.jsoup.select.Elements;
 import ie.tcd.lucene.scobo.models.LATimesModel;
 
 public class LATimesParser {
-	private static Logger LOGGER = Logger.getLogger(FinancialTimesLtdParser.class.getName());
+	private static Logger LOGGER = Logger.getLogger(LATimesParser.class.getName());
 
 	protected static final String DOC = "DOC";
 	protected static final String DOC_NO = "DOCNO";
