@@ -1,16 +1,8 @@
 package ie.tcd.lucene.scobo.parsers;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -24,7 +16,7 @@ import org.jsoup.select.Elements;
 
 public class FbisParser {
 	
-	private static Logger LOGGER = Logger.getLogger(LATimesParser.class.getName());
+	private static Logger LOGGER = Logger.getLogger(FbisParser.class.getName());
 
 	protected static final String DOC = "DOC";
 	protected static final String DOC_NO = "DOCNO";
@@ -62,9 +54,9 @@ public class FbisParser {
 	private static Document createNewDocument(Element htmlDoc) {
 		
 		Document doc = new Document();
-		doc.add(new StringField("doc_id", htmlDoc.select(DOC_ID).text(), Field.Store.YES));
+//		doc.add(new StringField("doc_id", htmlDoc.select(DOC_ID).text(), Field.Store.YES));
 		doc.add(new StringField("doc_no", htmlDoc.select(DOC_NO).text(), Field.Store.YES));
-        doc.add(new TextField("title", htmlDoc.select(TITLE).text(), Field.Store.YES));
+        doc.add(new TextField("headline", htmlDoc.select(TITLE).text(), Field.Store.YES));
         
         String textContent = htmlDoc.select(TEXT).text();
 		if (!textContent.contains("[Text]")) {
@@ -77,7 +69,7 @@ public class FbisParser {
             textContent = textContent.substring(textContent.indexOf("[Text]")).replace("[Text]", "").trim();
         }
         
-        doc.add(new TextField("text", textContent, Field.Store.YES));
+        doc.add(new TextField("text", textContent.trim(), Field.Store.YES));
         
         return doc;
 	}

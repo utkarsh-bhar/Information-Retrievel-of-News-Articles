@@ -2,8 +2,8 @@ package ie.tcd.lucene.scobo.parsers;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
-import org.apache.lucene.document.IntPoint;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -14,49 +14,58 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-
 public class FR94Parser {
-	private static List<Document> frDocList = new ArrayList<>();
+	private static Logger LOGGER = Logger.getLogger(FR94Parser.class.getName());
 
-    public static List<Document> loadFrDocs(String pathFR) throws IOException {
-    	File[] dirs = new File(pathFR).listFiles(File::isDirectory);
-		String docno, text,title;
-		for(File dir : dirs) {
-			File[] files = dir.listFiles();
-			for(File file : files) {
-				org.jsoup.nodes.Document d =  Jsoup.parse(file,null,"");
-				Elements docs = d.select("DOC");
-				for(Element doc : docs) {
-					title = doc.select("DOCTITLE").text();
-
-                    doc.select("DOCTITLE").remove();
-                    doc.select("ADDRESS").remove();
-                    doc.select("SIGNER").remove();
-                    doc.select("SIGNJOB").remove();
-                    doc.select("BILLING").remove();
-                    doc.select("FRFILING").remove();
-                    doc.select("DATE").remove();
-                    doc.select("CRFNO").remove();
-                    doc.select("RINDOCK").remove();
-
-                    docno = doc.select("DOCNO").text();
-                    text = doc.select("TEXT").text();
-
-                    addFedRegisterDoc(docno, text, title);
-
+	public static List<Document> loadDocuments(List<String> fileNames) throws IOException {
+		List<Document> documentsList = new ArrayList<>();
+		File file;
+		
+		LOGGER.info("Parsing FR94 Docs");
+		
+		try {
+			for (String fileName : fileNames) {
+				file = new File(fileName);
+				org.jsoup.nodes.Document htmlDocument = Jsoup.parse(file, null, "");
+				Elements docElements = htmlDocument.select("DOC");
+				for (Element htmlDoc : docElements) {
+					
+					String title = htmlDoc.select("DOCTITLE").text();
+					
+					// Remove as not required
+                    htmlDoc.select("DOCTITLE").remove();
+                    htmlDoc.select("ADDRESS").remove();
+                    htmlDoc.select("SIGNER").remove();
+                    htmlDoc.select("SIGNJOB").remove();
+                    htmlDoc.select("BILLING").remove();
+                    htmlDoc.select("FRFILING").remove();
+                    htmlDoc.select("DATE").remove();
+                    htmlDoc.select("CRFNO").remove();
+                    htmlDoc.select("RINDOCK").remove();
+                    
+                    String docno = htmlDoc.select("DOCNO").text();
+                    String text = htmlDoc.select("TEXT").text();
+                    
+                    Document doc = createDocument(docno, text, title);
+                    documentsList.add(doc);
 				}
-				
 			}
+		} catch (Exception e) {
+			LOGGER.severe(e.getMessage());
 		}
-		return frDocList;
-    }
-
-    private static void addFedRegisterDoc(String docno, String text, String title) {
+		
+		LOGGER.info(String.format("Parsed %d FR94 Docs", documentsList.size()));
+		
+		return documentsList;
+	}
+	
+    private static Document createDocument(String docno, String text, String title) {
         Document doc = new Document();
-        doc.add(new TextField("docno", docno, Field.Store.YES));
+        doc.add(new StringField("doc_no", docno, Field.Store.YES));
         doc.add(new TextField("text", text, Field.Store.YES));
         doc.add(new TextField("headline", title, Field.Store.YES));
-        frDocList.add(doc);
+        
+        return doc;
     }
 }
 

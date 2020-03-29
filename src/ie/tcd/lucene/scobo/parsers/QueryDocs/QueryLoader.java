@@ -1,23 +1,14 @@
 package ie.tcd.lucene.scobo.parsers.QueryDocs;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class Queries {
-	private static String queryPath ;
-	
-	
+public class QueryLoader {
 
-    public static List<QueryObjects> queryLoader() {
+    public static List<QueryObjects> loadQueries(String queryPath) {
         QueryObjects queryObject = new QueryObjects();
         String dummyTag = QueryXmlTags.TOP_START.getTag();
     	String topTag = QueryXmlTags.TOP_START.getTag();

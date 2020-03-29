@@ -14,8 +14,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import ie.tcd.lucene.scobo.models.LATimesModel;
-
 public class LATimesParser {
 	private static Logger LOGGER = Logger.getLogger(LATimesParser.class.getName());
 
@@ -55,7 +53,7 @@ public class LATimesParser {
 	private static Document createNewDocument(Element htmlDoc) {
 		
 		Document doc = new Document();
-		doc.add(new StringField("doc_id", htmlDoc.select(DOC_ID).text(), Field.Store.YES));
+//		doc.add(new StringField("doc_id", htmlDoc.select(DOC_ID).text(), Field.Store.YES));
 		doc.add(new StringField("doc_no", htmlDoc.select(DOC_NO).text(), Field.Store.YES));
         doc.add(new TextField("headline", htmlDoc.select(HEADLINE).select("P").text(), Field.Store.YES));
         doc.add(new TextField("text", htmlDoc.select(TEXT).select("P").text(), Field.Store.YES));

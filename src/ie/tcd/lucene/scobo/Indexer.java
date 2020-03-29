@@ -60,6 +60,7 @@ public class Indexer {
 		List<Document> laTimesDocs = contentParser.getLaTimesDocs();
 		List<Document> financialTimesLtdDocs = contentParser.getFinancialTimesLtdDocs();
 		List<Document> fbisDocs = contentParser.getFbisDocs();
+		List<Document> frDocs = contentParser.getFedRegisterDocs();
 		
 		LOGGER.info("Loaded all documents");
 		
@@ -72,15 +73,15 @@ public class Indexer {
 		IndexWriterConfig config = createIndexWriterConfig(indexAnalyzer, IndexWriterConfig.OpenMode.CREATE, similarityScorer);
 		Directory indexDir = FSDirectory.open(Paths.get(indexPath));
 		
-		
-		// Load indexes to path
-		
+
+		// Write indexes
 		LOGGER.info("Started Indexing...");
 		
 		try (IndexWriter indexWriter = new IndexWriter(indexDir, config)) {
 			indexWriter.addDocuments(financialTimesLtdDocs);
 			indexWriter.addDocuments(laTimesDocs);
 			indexWriter.addDocuments(fbisDocs);
+//			indexWriter.addDocuments(frDocs);
 			
 			indexWriter.close();
 		} catch (IOException e) {

@@ -52,10 +52,10 @@ public class FinancialTimesLtdParser {
 	private static Document createNewDocument(Element htmlDoc) {
 		Document doc = new Document();
 		
-		doc.add(new StringField("doc_id", htmlDoc.select(DOC_ID).text(), Field.Store.YES));
+//		doc.add(new StringField("doc_id", htmlDoc.select(DOC_ID).text(), Field.Store.YES));
 		doc.add(new StringField("doc_no", htmlDoc.select(DOC_NO).text(), Field.Store.YES));
         doc.add(new TextField("headline", htmlDoc.select(HEADLINE).text(), Field.Store.YES));
-        doc.add(new StringField("by_line", htmlDoc.select(BYLINE).text(), Field.Store.YES));
+//        doc.add(new StringField("by_line", htmlDoc.select(BYLINE).text(), Field.Store.YES));
         doc.add(new TextField("text", htmlDoc.select(TEXT).text(), Field.Store.YES));
         
         return doc;
