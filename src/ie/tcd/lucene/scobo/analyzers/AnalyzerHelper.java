@@ -45,6 +45,7 @@ public class AnalyzerHelper {
 			return new EnglishAnalyzer();
 		}
 	}
+	
 	public static Analyzer customAnalyzer() throws IOException {
 		Analyzer analyzer = CustomAnalyzer.builder()
 			      .withTokenizer("standard")
@@ -55,10 +56,18 @@ public class AnalyzerHelper {
 			      .build();
 		return analyzer;
 	}
-public static Similarity multiSimilarity() {
-	Similarity similarity[] = { new BM25Similarity(3, (float) 0.9),
-			new DFRSimilarity(new BasicModelIn(), new AfterEffectB(), new NormalizationH1()),
-			new LMDirichletSimilarity(5000) };
-	return (new MultiSimilarity(similarity));
-}
+	
+	public static Similarity multiSimilarity() {
+		Similarity similarity[] = { 
+			new BM25Similarity(3, (float) 0.9),
+			new DFRSimilarity(
+				new BasicModelIn(), 
+				new AfterEffectB(), 
+				new NormalizationH1()
+			),
+			new LMDirichletSimilarity(5000)
+		};
+		
+		return (new MultiSimilarity(similarity));
+	}
 }
