@@ -22,7 +22,6 @@ public class FR94Parser {
 		File file;
 		
 		LOGGER.info("Parsing FR94 Docs");
-		
 		try {
 			for (String fileName : fileNames) {
 				file = new File(fileName);
@@ -31,6 +30,7 @@ public class FR94Parser {
 				for (Element htmlDoc : docElements) {
 					
 					String title = htmlDoc.select("DOCTITLE").text();
+					
 					
 					// Remove as not required
                     htmlDoc.select("DOCTITLE").remove();
@@ -43,7 +43,7 @@ public class FR94Parser {
                     htmlDoc.select("CRFNO").remove();
                     htmlDoc.select("RINDOCK").remove();
                     
-                    String docno = htmlDoc.select("DOCNO").text();
+                    String docno = htmlDoc.select("DOCNO").text().trim();
                     String text = htmlDoc.select("TEXT").text();
                     
                     Document doc = createDocument(docno, text, title);

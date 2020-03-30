@@ -81,7 +81,7 @@ public class Indexer {
 			indexWriter.addDocuments(financialTimesLtdDocs);
 			indexWriter.addDocuments(laTimesDocs);
 			indexWriter.addDocuments(fbisDocs);
-//			indexWriter.addDocuments(frDocs);
+			indexWriter.addDocuments(frDocs);
 			
 			indexWriter.close();
 		} catch (IOException e) {

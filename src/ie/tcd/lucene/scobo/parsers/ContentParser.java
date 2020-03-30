@@ -76,7 +76,7 @@ public class ContentParser {
 		docDir = Paths.get(this.sourceDir + "/fr94");
 		List<String> frFiles = getFileNamesFromDirTree(docDir);
 		new FR94Parser();
-		this.fbisDocs = FR94Parser.loadDocuments(frFiles);
+		this.fedRegisterDocs = FR94Parser.loadDocuments(frFiles);
 	}
 	
 	private static List<String> getFileNamesFromDirTree(Path rootDir){
