@@ -67,15 +67,16 @@ public class QueryRunner {
 		Directory indexDir = FSDirectory.open(Paths.get(indexPath));
 	
 		// Load queries
+		
 		new QueryLoader();
 		List<QueryObjects> queries = QueryLoader.loadQueries(queryFilePath);
 		
+		LOGGER.info(String.format("Loaded %d queries", queries.size()));
 		// Initialize query engine
 		QueryEngine engine = new QueryEngine(indexDir, indexAnalyzer, similarityScorer);
 		IndexSearcher indexSearcher = engine.getSearcher();
 		FileWriter csvWriter = new FileWriter(outputFilePath);
 		
-		int queryCount = 1;
 		for (QueryObjects queryObj : queries) {
 			BooleanQuery query = engine.buildQuery(queryObj);
 			ScoreDoc[] hits = engine.executeQuery(query, paginationCount);
@@ -85,11 +86,9 @@ public class QueryRunner {
 				String docNo = indexSearcher.doc(hits[i].doc).get("doc_no");
 				double score = hits[i].score;
 				
-				csvWriter.append(queryCount + " " + "0" + " " + (docNo) + " " + (i + 1) + " " + score + " END" );
+				csvWriter.append(queryObj.getQueryNumber() + " 0 "  + (docNo) + " " + (i + 1) + " " + score + " END" );
 				csvWriter.append("\n");
 			}
-
-			queryCount++;
 		}
 		
 		// Cleanup
@@ -97,8 +96,5 @@ public class QueryRunner {
 		csvWriter.close();
 		
 		LOGGER.info("Completed!");
-		LOGGER.info(String.format("Total number of queries executed: %d", queryCount));
-		
-		
 	}
 }

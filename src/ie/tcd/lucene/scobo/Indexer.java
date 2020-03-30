@@ -29,7 +29,7 @@ public class Indexer {
 		String analyzerType = null;
 		String sourceDir = null;
 		String scoring = null;
-		
+
 		for (int i = 0; i < args.length; i++) {
 			if ("-scoring".equals(args[i])) {
 				scoring = args[i + 1];
@@ -55,16 +55,6 @@ public class Indexer {
 		// Load all documents
 		ContentParser contentParser = new ContentParser(sourceDir);
 		
-		contentParser.loadContentFiles();
-		
-		List<Document> laTimesDocs = contentParser.getLaTimesDocs();
-		List<Document> financialTimesLtdDocs = contentParser.getFinancialTimesLtdDocs();
-		List<Document> fbisDocs = contentParser.getFbisDocs();
-		List<Document> frDocs = contentParser.getFedRegisterDocs();
-		
-		LOGGER.info("Loaded all documents");
-		
-		
 		// Configure analyzer, scorer, and index config
 		
 		Analyzer indexAnalyzer = AnalyzerHelper.getAnalyzer(analyzerType); 
@@ -73,14 +63,21 @@ public class Indexer {
 		IndexWriterConfig config = createIndexWriterConfig(indexAnalyzer, IndexWriterConfig.OpenMode.CREATE, similarityScorer);
 		Directory indexDir = FSDirectory.open(Paths.get(indexPath));
 		
-
 		// Write indexes
 		LOGGER.info("Started Indexing...");
 		
 		try (IndexWriter indexWriter = new IndexWriter(indexDir, config)) {
-			indexWriter.addDocuments(financialTimesLtdDocs);
+			
+			List<Document> laTimesDocs = contentParser.loadLATimesFiles();
 			indexWriter.addDocuments(laTimesDocs);
+			
+			List<Document> financialTimesLtdDocs = contentParser.loadFinancialTimesFiles();
+			indexWriter.addDocuments(financialTimesLtdDocs);
+			
+			List<Document> fbisDocs = contentParser.loadFBISFiles();
 			indexWriter.addDocuments(fbisDocs);
+			
+			List<Document> frDocs = contentParser.loadFRFiles();
 			indexWriter.addDocuments(frDocs);
 			
 			indexWriter.close();

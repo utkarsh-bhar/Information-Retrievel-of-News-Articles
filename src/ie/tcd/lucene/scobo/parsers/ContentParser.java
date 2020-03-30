@@ -19,66 +19,45 @@ public class ContentParser {
 
 	private String sourceDir;
 	
-	private List<Document> financialTimesLtdDocs;
-	private List<Document> fedRegisterDocs;
-	private List<Document> laTimesDocs;
-	private List<Document> fbisDocs;
-	
-	/*
-	 * Getters 
-	 */
-	
-	public List<Document> getFinancialTimesLtdDocs() {
-		return financialTimesLtdDocs;
-	}
-
-
-	public List<Document> getFedRegisterDocs() {
-		return fedRegisterDocs;
-	}
-
-
-	public List<Document> getLaTimesDocs() {
-		return laTimesDocs;
-	}
-
-
-	public List<Document> getFbisDocs() {
-		return fbisDocs;
-	}
-
-
 	public ContentParser(String sourceDir) {
 		this.sourceDir = sourceDir;
 	}
 
 	/*
-	 * Load all newspaper articles
+	 * Load news paper documents individually
 	 */
-	public void loadContentFiles() throws IOException {
-		LOGGER.info("Loading documents");
-		
+	
+	public List<Document> loadLATimesFiles() throws IOException {
 		Path docDir = Paths.get(this.sourceDir + "/latimes");
 		List<String> laTimesFiles = getFileNamesFromDirTree(docDir);
 		new LATimesParser();
-		this.laTimesDocs = LATimesParser.loadDocuments(laTimesFiles);
-		
-		docDir = Paths.get(this.sourceDir + "/ft");
-		List<String> financialTimesLtdFiles = getFileNamesFromDirTree(docDir);
-		new FinancialTimesLtdParser();
-		this.financialTimesLtdDocs = FinancialTimesLtdParser.loadDocuments(financialTimesLtdFiles);
-		
-		docDir = Paths.get(this.sourceDir + "/fbis");
-		List<String> fbisFiles = getFileNamesFromDirTree(docDir);
-		new FbisParser();
-		this.fbisDocs = FbisParser.loadDocuments(fbisFiles);
-		
-		docDir = Paths.get(this.sourceDir + "/fr94");
-		List<String> frFiles = getFileNamesFromDirTree(docDir);
-		new FR94Parser();
-		this.fedRegisterDocs = FR94Parser.loadDocuments(frFiles);
+		return LATimesParser.loadDocuments(laTimesFiles);
 	}
 	
+	public List<Document> loadFinancialTimesFiles() throws IOException {
+		Path docDir = Paths.get(this.sourceDir + "/ft");
+		List<String> financialTimesLtdFiles = getFileNamesFromDirTree(docDir);
+		new FinancialTimesLtdParser();
+		return FinancialTimesLtdParser.loadDocuments(financialTimesLtdFiles);	
+	}
+	
+	public List<Document> loadFBISFiles() throws IOException {
+		Path docDir = Paths.get(this.sourceDir + "/fbis");
+		List<String> fbisFiles = getFileNamesFromDirTree(docDir);
+		new FbisParser();
+		return FbisParser.loadDocuments(fbisFiles);
+	}
+	
+	public List<Document> loadFRFiles() throws IOException {
+		Path docDir = Paths.get(this.sourceDir + "/fr94");
+		List<String> frFiles = getFileNamesFromDirTree(docDir);
+		new FR94Parser();
+		return FR94Parser.loadDocuments(frFiles);
+	}
+	
+	/*
+	 * Walk through directory to fetch all file names
+	 */
 	private static List<String> getFileNamesFromDirTree(Path rootDir){
         List<String> filesList = new ArrayList<>();
         try {
