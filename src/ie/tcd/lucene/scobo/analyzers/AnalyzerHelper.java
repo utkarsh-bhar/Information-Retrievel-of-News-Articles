@@ -3,6 +3,7 @@ package ie.tcd.lucene.scobo.analyzers;
 import java.io.IOException;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.core.StopAnalyzer;
 import org.apache.lucene.analysis.custom.CustomAnalyzer;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -26,7 +27,9 @@ public class AnalyzerHelper {
 			return new ClassicSimilarity();
 		}else if ("multisimilarity".equals(scoring)) {
 			return  multiSimilarity();
-		} else {
+		}else if ("customBM25".equals(scoring)) {
+			return  new CustomBM25();
+		}else {
 			System.out.println("No scorer provided. Defaulting to BM25");
 			return new BM25Similarity(1.2f, 0.75f);
 		}
@@ -38,23 +41,17 @@ public class AnalyzerHelper {
 		else if ("standardAnalyzer".equals(analyzerType)) {
 			return new StandardAnalyzer();
 		}
-		else if ("customAnalyzer".equals(analyzerType)) {
-			return  customAnalyzer();
+		//with default stopwords list
+		else if ("team9customanalyzerwithstopwords".equals(analyzerType)) {
+			return   new StopAnalyzer(Team9CustomAnalyzer.getDefaultStopSet());
+		}
+		//without default stopwords list
+		else if ("team9customanalyzer".equals(analyzerType)) {
+			return   new Team9CustomAnalyzer();
 		}else {
 			System.out.println("No analyzer provided. Defaulting to English Analyzer.");
 			return new EnglishAnalyzer();
 		}
-	}
-	
-	public static Analyzer customAnalyzer() throws IOException {
-		Analyzer analyzer = CustomAnalyzer.builder()
-			      .withTokenizer("standard")
-			      .addTokenFilter("lowercase")
-			      .addTokenFilter("stop")
-			      .addTokenFilter("porterstem")
-			      .addTokenFilter("capitalization")
-			      .build();
-		return analyzer;
 	}
 	
 	public static Similarity multiSimilarity() {
