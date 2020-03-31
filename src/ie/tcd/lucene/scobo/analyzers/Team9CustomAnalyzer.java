@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.LowerCaseFilter;
+import org.apache.lucene.analysis.miscellaneous.TrimFilter;
 import org.apache.lucene.analysis.StopFilter;
 import org.apache.lucene.analysis.StopwordAnalyzerBase;
 import org.apache.lucene.analysis.TokenStream;
@@ -21,6 +22,8 @@ import org.apache.lucene.analysis.en.KStemFilter;
 import org.apache.lucene.analysis.en.EnglishMinimalStemFilter;
 import org.apache.lucene.analysis.snowball.SnowballFilter;
 import org.tartarus.snowball.ext.EnglishStemmer;
+import org.apache.lucene.analysis.core.FlattenGraphFilter;
+import org.apache.lucene.analysis.miscellaneous.WordDelimiterGraphFilter;
 
 
 
@@ -169,16 +172,20 @@ public class Team9CustomAnalyzer extends StopwordAnalyzerBase {
 
     @Override
     protected TokenStreamComponents createComponents(String s) {
-    	 final Tokenizer source = new StandardTokenizer();
-		    TokenStream result = new EnglishPossessiveFilter(source);
-		    result = new LowerCaseFilter(result);
-		   // result = new EnglishMinimalStemFilter(result);
-		    result = new StopFilter(result, stopwords);
-		    if(!exclusionSet.isEmpty())
-		      result = new SetKeywordMarkerFilter(result, exclusionSet);
-		    result = new SnowballFilter(result, new EnglishStemmer());
-	        result = new PorterStemFilter(result);
-		    return new TokenStreamComponents(source, result);
+    	  final Tokenizer source = new StandardTokenizer();
+    	   TokenStream result = new EnglishPossessiveFilter(source);
+    	   result = new LowerCaseFilter(result);
+    	   result = new TrimFilter(result);
+    	  // result = new EnglishMinimalStemFilter(result);
+    	   result = new FlattenGraphFilter(new WordDelimiterGraphFilter(result, WordDelimiterGraphFilter.SPLIT_ON_NUMERICS |
+    	WordDelimiterGraphFilter.GENERATE_WORD_PARTS | WordDelimiterGraphFilter.GENERATE_NUMBER_PARTS |
+    	WordDelimiterGraphFilter.PRESERVE_ORIGINAL , null));
+    	   result = new StopFilter(result, stopwords);
+    	   if(!exclusionSet.isEmpty())
+    	     result = new SetKeywordMarkerFilter(result, exclusionSet);
+    	   result = new SnowballFilter(result, new EnglishStemmer());
+    	       result = new PorterStemFilter(result);
+    	   return new TokenStreamComponents(source, result);
     }
     @Override
 	  protected TokenStream normalize(String stringName, TokenStream stream) {
