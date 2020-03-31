@@ -44,7 +44,7 @@ public class FR94Parser {
                     htmlDoc.select("RINDOCK").remove();
                     
                     String docno = htmlDoc.select("DOCNO").text().trim();
-                    String text = htmlDoc.select("TEXT").text();
+                    String text = cleanTextContent(htmlDoc.select("TEXT").text());
                     
                     Document doc = createDocument(docno, text, title);
                     documentsList.add(doc);
@@ -66,6 +66,30 @@ public class FR94Parser {
         doc.add(new TextField("headline", title, Field.Store.YES));
         
         return doc;
+    }
+    
+    private static String cleanTextContent(String text) {
+    	String[] lines = text.split(System.getProperty("line.separator"));
+    	Integer i = 0;
+    	for (String line : lines) {
+    		if (line.contains("-- PJG")) {
+        		line = line.replace(line.substring(line.indexOf("<!-- PJG"), line.indexOf(">") + 1), "");
+    		}
+    		if (line.contains("/&blank;")) {
+                line = line.replace("/&blank;", " ");
+            }
+            if (line.contains("&blank;")) {
+                line = line.replace("&blank;", " ");
+            }
+
+            if (line.contains("&hyph;")) {
+                line = line.replace("&hyph;", "-");
+            }
+            lines[i] = line;
+            i++;
+    	}
+    	
+    	return String.join(System.getProperty("line.separator"), lines);
     }
 }
 
