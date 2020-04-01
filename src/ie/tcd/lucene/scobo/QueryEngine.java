@@ -69,8 +69,8 @@ public class QueryEngine {
 		BooleanQuery.Builder finalQuery = new BooleanQuery.Builder();
 		
 		String title = queryObj.getQueryTitle();
-		String description=queryObj.getQueryDescription();
-		if (title.length() > 0) {
+		String description = queryObj.getQueryDescription();
+		if (!title.isEmpty()) {
 			/*
 			 * If the title is in the form of "Ireland, peace talks",
 			 * then build the query as
@@ -83,11 +83,14 @@ public class QueryEngine {
 					finalQuery.add(tokenQuery, BooleanClause.Occur.MUST);
 				}
 			} else {
-				Query titleQuery = this.queryParser.parse(QueryParser.escape(description));
-				Query descriptionQuery = this.queryParser.parse(QueryParser.escape(title));
+				Query titleQuery = this.queryParser.parse(QueryParser.escape(title));
 				finalQuery.add(titleQuery, BooleanClause.Occur.MUST);
-				finalQuery.add(descriptionQuery, BooleanClause.Occur.MUST);
 			}
+		}
+		
+		if (!description.isEmpty()) {
+			Query descriptionQuery = this.queryParser.parse(QueryParser.escape(title));
+			finalQuery.add(descriptionQuery, BooleanClause.Occur.SHOULD);
 		}
 		
 		return finalQuery.build();
