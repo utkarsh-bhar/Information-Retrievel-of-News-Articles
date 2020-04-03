@@ -3,8 +3,6 @@ package ie.tcd.lucene.scobo.analyzers;
 import java.io.IOException;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.core.StopAnalyzer;
-import org.apache.lucene.analysis.custom.CustomAnalyzer;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.search.similarities.AfterEffectB;
@@ -41,14 +39,14 @@ public class AnalyzerHelper {
 		else if ("standardAnalyzer".equals(analyzerType)) {
 			return new StandardAnalyzer();
 		}
-		//with default stopwords list
-		else if ("team9customanalyzerwithstopwords".equals(analyzerType)) {
-			return   new StopAnalyzer(Team9CustomAnalyzer.getDefaultStopSet());
+		// with default stopwords list
+		else if ("teamScoboCustomAnalyzerWithStopwords".equals(analyzerType)) {
+			return new TeamScoboCustomAnalyzer(TeamScoboCustomAnalyzer.getDefaultStopSet());
 		}
-		//without default stopwords list
-		else if ("team9customanalyzer".equals(analyzerType)) {
-			return   new Team9CustomAnalyzer();
-		}else {
+		// without default stopwords list
+		else if ("teamScoboCustomAnalyzer".equals(analyzerType)) {
+			return new TeamScoboCustomAnalyzer();
+		} else {
 			System.out.println("No analyzer provided. Defaulting to English Analyzer.");
 			return new EnglishAnalyzer();
 		}

@@ -1,10 +1,8 @@
 package ie.tcd.lucene.scobo.analyzers;
 
-import java.io.Reader;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.LowerCaseFilter;
 import org.apache.lucene.analysis.miscellaneous.TrimFilter;
@@ -12,28 +10,22 @@ import org.apache.lucene.analysis.StopFilter;
 import org.apache.lucene.analysis.StopwordAnalyzerBase;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
-import org.apache.lucene.analysis.Analyzer.TokenStreamComponents;
-import org.apache.lucene.analysis.core.LetterTokenizer;
 import org.apache.lucene.analysis.en.EnglishPossessiveFilter;
 import org.apache.lucene.analysis.en.PorterStemFilter;
 import org.apache.lucene.analysis.miscellaneous.SetKeywordMarkerFilter;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
-import org.apache.lucene.analysis.en.KStemFilter;
-import org.apache.lucene.analysis.en.EnglishMinimalStemFilter;
 import org.apache.lucene.analysis.snowball.SnowballFilter;
 import org.tartarus.snowball.ext.EnglishStemmer;
 import org.apache.lucene.analysis.core.FlattenGraphFilter;
 import org.apache.lucene.analysis.miscellaneous.WordDelimiterGraphFilter;
 
-
-
-public class Team9CustomAnalyzer extends StopwordAnalyzerBase {
+public class TeamScoboCustomAnalyzer extends StopwordAnalyzerBase {
 	
 	private int maxLengthToken = 255;
 	public static final CharArraySet ENGLISH_STOP_WORDS_SET;
 
-	  static {
-	    final List<String> stopWords = Arrays.asList(
+	static {
+		final List<String> stopWords = Arrays.asList(
 	    		"'ll","'tis","'twas","'ve","10","39","a","a's","able","ableabout","about",
                 "ad","added","adj","adopted","ae","af","affected","affecting","affects","after","afterwards",
                 "anyway","anyways","anywhere","ao","apart","apparently","appear","appreciate","appropriate","approximately",
@@ -127,68 +119,80 @@ public class Team9CustomAnalyzer extends StopwordAnalyzerBase {
                 "worked","working","works","world","would","would've","wouldn","wouldn't","wouldnt","ws","www","x","y","ye","year",
                 "years","yes","yet","you","you'd","you'll","you're","you've","youd","youll","young","younger","youngest",
                 "your","youre","yours","yourself","yourselves","youve","yt","yu","z","za","zero","zm","zr"  );
-	    final CharArraySet stopSet = new CharArraySet(stopWords, false);
+		final CharArraySet stopSet = new CharArraySet(stopWords, false);
 	    ENGLISH_STOP_WORDS_SET = CharArraySet.unmodifiableSet(stopSet);
-	  }
+	}
 	  
-	  private final CharArraySet exclusionSet;
-	  /**
-	   * Returns an unmodifiable instance of the default stop words set.
-	   * @return default stop words set.
-	   */
-	  public static CharArraySet getDefaultStopSet(){
-	    return ENGLISH_STOP_WORDS_SET;
-	  }
-
-	  /**
-	   * Builds an analyzer with the default stop words: {@link #getDefaultStopSet}.
-	   */
-	  public Team9CustomAnalyzer() {
-	    this(ENGLISH_STOP_WORDS_SET);
-	  }
+	private final CharArraySet exclusionSet;
+	/**
+	 * Returns an unmodifiable instance of the default stop words set.
+	 * @return default stop words set.
+	 */
+	public static CharArraySet getDefaultStopSet() {
+		return ENGLISH_STOP_WORDS_SET;
+	}
+		
+	/*
+	 * Builds an analyzer with the default stop words: {@link #getDefaultStopSet}.
+	 */
+	public TeamScoboCustomAnalyzer() {
+		this(ENGLISH_STOP_WORDS_SET);
+	}
 	  
-	  /**
-	   * Builds an analyzer with the given stop words.
-	   * 
-	   * @param stopwords a stopword set
-	   */
-	  public Team9CustomAnalyzer(CharArraySet stopwords) {
-	    this(stopwords, CharArraySet.EMPTY_SET);
-	  }
+	/**
+	 * Builds an analyzer with the given stop words. 
+	 * @param stopwords a stopword set
+	 */
+	public TeamScoboCustomAnalyzer(CharArraySet stopwords) {
+		this(stopwords, CharArraySet.EMPTY_SET);
+	}
 
-	  /**
-	   * Builds an analyzer with the given stop words. If a non-empty stem exclusion set is
-	   * provided this analyzer will add a {@link SetKeywordMarkerFilter} before
-	   * stemming.
-	   * 
-	   * @param stopwords a stopword set
-	   * @param stemExclusionSet a set of terms not to be stemmed
-	   */
-	  public Team9CustomAnalyzer(CharArraySet stopwords, CharArraySet exclusionSet) {
-	    super(stopwords);
-	    this.exclusionSet = CharArraySet.unmodifiableSet(CharArraySet.copy(exclusionSet));
-	  }
-
+	/**
+	 * Builds an analyzer with the given stop words. If a non-empty stem exclusion set is
+	 * provided this analyzer will add a {@link SetKeywordMarkerFilter} before
+	 * stemming.
+	 * 
+	 * @param stopwords a stopword set
+	 * @param stemExclusionSet a set of terms not to be stemmed
+	 */
+	public TeamScoboCustomAnalyzer(CharArraySet stopwords, CharArraySet exclusionSet) {
+		super(stopwords);
+		this.exclusionSet = CharArraySet.unmodifiableSet(CharArraySet.copy(exclusionSet));
+	}
 
     @Override
     protected TokenStreamComponents createComponents(String s) {
-    	  final Tokenizer source = new StandardTokenizer();
-    	   TokenStream result = new EnglishPossessiveFilter(source);
-    	   result = new LowerCaseFilter(result);
-    	   result = new TrimFilter(result);
-    	  // result = new EnglishMinimalStemFilter(result);
-    	   result = new FlattenGraphFilter(new WordDelimiterGraphFilter(result, WordDelimiterGraphFilter.SPLIT_ON_NUMERICS |
-    	WordDelimiterGraphFilter.GENERATE_WORD_PARTS | WordDelimiterGraphFilter.GENERATE_NUMBER_PARTS |
-    	WordDelimiterGraphFilter.PRESERVE_ORIGINAL , null));
-    	   result = new StopFilter(result, stopwords);
-    	   if(!exclusionSet.isEmpty())
-    	     result = new SetKeywordMarkerFilter(result, exclusionSet);
-    	   result = new SnowballFilter(result, new EnglishStemmer());
-    	       result = new PorterStemFilter(result);
-    	   return new TokenStreamComponents(source, result);
+    	final Tokenizer source = new StandardTokenizer();
+    	TokenStream result = new EnglishPossessiveFilter(source);
+    	result = new LowerCaseFilter(result);
+    	result = new TrimFilter(result);
+    	// result = new EnglishMinimalStemFilter(result);
+    	
+    	result = new FlattenGraphFilter(
+    		new WordDelimiterGraphFilter(
+    			result, 
+    			WordDelimiterGraphFilter.SPLIT_ON_NUMERICS |
+    			WordDelimiterGraphFilter.GENERATE_WORD_PARTS | 
+    			WordDelimiterGraphFilter.GENERATE_NUMBER_PARTS |
+    			WordDelimiterGraphFilter.PRESERVE_ORIGINAL, 
+    			null
+    		)
+    	);
+    	
+    	result = new StopFilter(result, stopwords);
+    	
+    	if(!exclusionSet.isEmpty()) {
+    		result = new SetKeywordMarkerFilter(result, exclusionSet);
+    	}     
+    	
+    	result = new SnowballFilter(result, new EnglishStemmer());
+    	result = new PorterStemFilter(result);
+    	
+    	return new TokenStreamComponents(source, result);
     }
+    
     @Override
-	  protected TokenStream normalize(String stringName, TokenStream stream) {
-	    return new LowerCaseFilter(stream);
-	  }
+    protected TokenStream normalize(String stringName, TokenStream stream) {
+    	return new LowerCaseFilter(stream);
+    }
 }
