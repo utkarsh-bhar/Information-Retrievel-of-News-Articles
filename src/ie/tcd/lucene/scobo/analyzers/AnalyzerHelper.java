@@ -23,13 +23,14 @@ public class AnalyzerHelper {
 			return new BM25Similarity(1.2f, 0.75f);
 		} else if ("tfidf".equals(scoring)) {
 			return new ClassicSimilarity();
-		}else if ("multisimilarity".equals(scoring)) {
+		} else if ("multisimilarity".equals(scoring)) {
 			return  multiSimilarity();
-		}else if ("customBM25".equals(scoring)) {
+		} else if ("customBM25".equals(scoring)) {
 			return  new CustomBM25();
-		}else {
+		} else {
 			System.out.println("No scorer provided. Defaulting to BM25");
-			return new BM25Similarity(1.2f, 0.75f);
+			return new CustomBM25();
+//			return new BM25Similarity(1.2f, 0.75f);
 		}
 	}
 	
@@ -48,7 +49,8 @@ public class AnalyzerHelper {
 			return new TeamScoboCustomAnalyzer();
 		} else {
 			System.out.println("No analyzer provided. Defaulting to English Analyzer.");
-			return new EnglishAnalyzer();
+			return new TeamScoboCustomAnalyzer(TeamScoboCustomAnalyzer.getDefaultStopSet());
+//			return new EnglishAnalyzer();
 		}
 	}
 	

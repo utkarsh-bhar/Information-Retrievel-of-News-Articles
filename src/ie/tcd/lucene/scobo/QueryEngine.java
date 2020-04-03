@@ -70,6 +70,7 @@ public class QueryEngine {
 		
 		String title = queryObj.getQueryTitle();
 		String description = queryObj.getQueryDescription();
+		
 		if (!title.isEmpty()) {
 			/*
 			 * If the title is in the form of "Ireland, peace talks",
@@ -89,8 +90,13 @@ public class QueryEngine {
 		}
 		
 		if (!description.isEmpty()) {
-			Query descriptionQuery = this.queryParser.parse(QueryParser.escape(title));
-			finalQuery.add(descriptionQuery, BooleanClause.Occur.SHOULD);
+			try {
+				Query descriptionQuery = this.queryParser.parse(QueryParser.escape(description));
+				finalQuery.add(descriptionQuery, BooleanClause.Occur.SHOULD);	
+			} catch (Exception e) {
+				System.out.println(description);
+			}
+			
 		}
 		
 		return finalQuery.build();
