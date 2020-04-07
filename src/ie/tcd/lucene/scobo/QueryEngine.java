@@ -95,7 +95,6 @@ public class QueryEngine {
 				finalQuery.add(descriptionQuery, BooleanClause.Occur.SHOULD);	
 			} catch (Exception e) {
 				LOGGER.severe("Unable to use description: " + stringFilter(description));
-				e.printStackTrace();
 			}
 			
 		}
