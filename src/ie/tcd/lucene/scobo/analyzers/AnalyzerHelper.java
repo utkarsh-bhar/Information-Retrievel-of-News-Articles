@@ -28,9 +28,8 @@ public class AnalyzerHelper {
 		} else if ("customBM25".equals(scoring)) {
 			return  new CustomBM25();
 		} else {
-			System.out.println("No scorer provided. Defaulting to BM25");
-			return new CustomBM25();
-//			return new BM25Similarity(1.2f, 0.75f);
+			System.out.println("No scorer provided. Defaulting to MultiSimilarity");
+			return multiSimilarity();
 		}
 	}
 	
@@ -47,10 +46,11 @@ public class AnalyzerHelper {
 		// without default stopwords list
 		else if ("teamScoboCustomAnalyzer".equals(analyzerType)) {
 			return new TeamScoboCustomAnalyzer();
+		} else if ("scobo-analyzer".equals(analyzerType))  {
+			return new ScoboCustomAnalyzer();
 		} else {
-			System.out.println("No analyzer provided. Defaulting to English Analyzer.");
-			return new TeamScoboCustomAnalyzer(TeamScoboCustomAnalyzer.getDefaultStopSet());
-//			return new EnglishAnalyzer();
+			System.out.println("No analyzer provided. Defaulting to ScoboCustomAnalyzer.");
+			return new ScoboCustomAnalyzer();
 		}
 	}
 	

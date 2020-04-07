@@ -81,25 +81,47 @@ public class QueryEngine {
 				String[] titleTokens = title.split(",");
 				for (String token : titleTokens) {
 					Query tokenQuery = this.queryParser.parse(QueryParser.escape(token));
-					finalQuery.add(tokenQuery, BooleanClause.Occur.MUST);
+					finalQuery.add(tokenQuery, BooleanClause.Occur.SHOULD);
 				}
 			} else {
 				Query titleQuery = this.queryParser.parse(QueryParser.escape(title));
-				finalQuery.add(titleQuery, BooleanClause.Occur.MUST);
+				finalQuery.add(titleQuery, BooleanClause.Occur.SHOULD);
 			}
 		}
 		
 		if (!description.isEmpty()) {
 			try {
-				Query descriptionQuery = this.queryParser.parse(QueryParser.escape(description));
+				Query descriptionQuery = this.queryParser.parse(QueryParser.escape(stringFilter(description)));
 				finalQuery.add(descriptionQuery, BooleanClause.Occur.SHOULD);	
 			} catch (Exception e) {
-				System.out.println(description);
+				LOGGER.severe("Unable to use description: " + stringFilter(description));
+				e.printStackTrace();
 			}
 			
 		}
 		
 		return finalQuery.build();
+	}
+	
+	private String stringFilter(String str) {
+		str = str.toLowerCase().replace("\"", "").trim().replace("?", "");
+		
+		return str.replaceAll("documents", "")
+			      .replaceAll("document", "")
+			      .replaceAll("relevant", "")
+			      .replaceAll("include", "")
+			      .replaceAll("discussions", "")
+			      .replaceAll("discussion", "")
+			      .replaceAll("discuss", "")
+			      .replaceAll("results", "")
+			      .replaceAll("result", "")
+			      .replaceAll("describing", "")
+			      .replaceAll("described", "")
+			      .replaceAll("describe", "")
+			      .replaceAll("provides", "")
+			      .replaceAll("provide", "")
+			      .replaceAll("find", "")
+			      .replaceAll("information", " ");
 	}
 	
 	private Map<String, Float> buildBoostMap() {
