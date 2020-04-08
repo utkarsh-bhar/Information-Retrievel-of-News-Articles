@@ -1,7 +1,10 @@
 package ie.tcd.lucene.scobo;
 
 import java.io.IOException;
+import java.text.BreakIterator;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -13,6 +16,7 @@ import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
@@ -21,6 +25,8 @@ import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.store.Directory;
 
 import ie.tcd.lucene.scobo.parsers.QueryDocs.QueryObjects;
+
+
 
 public class QueryEngine {
 	private static Logger LOGGER = Logger.getLogger(QueryEngine.class.getName());
@@ -71,6 +77,10 @@ public class QueryEngine {
 		String title = queryObj.getQueryTitle();
 		String description = queryObj.getQueryDescription();
 		
+		Query narrativeQuery = null;
+		List<String> splitNarrative = splitNarrativeIntoRelNotRel(queryObj.getQueryNarrative());
+		String relevantNarrative = splitNarrative.get(0).trim();
+		
 		if (!title.isEmpty()) {
 			/*
 			 * If the title is in the form of "Ireland, peace talks",
@@ -81,26 +91,68 @@ public class QueryEngine {
 				String[] titleTokens = title.split(",");
 				for (String token : titleTokens) {
 					Query tokenQuery = this.queryParser.parse(QueryParser.escape(token));
-					finalQuery.add(tokenQuery, BooleanClause.Occur.SHOULD);
+					finalQuery.add(new BoostQuery(tokenQuery,(float) 3.5), BooleanClause.Occur.SHOULD);
 				}
 			} else {
 				Query titleQuery = this.queryParser.parse(QueryParser.escape(title));
-				finalQuery.add(titleQuery, BooleanClause.Occur.SHOULD);
+				finalQuery.add(new BoostQuery(titleQuery,(float) 4), BooleanClause.Occur.SHOULD);
 			}
 		}
 		
 		if (!description.isEmpty()) {
 			try {
 				Query descriptionQuery = this.queryParser.parse(QueryParser.escape(stringFilter(description)));
-				finalQuery.add(descriptionQuery, BooleanClause.Occur.SHOULD);	
+				finalQuery.add(new BoostQuery(descriptionQuery,(float) 1.7), BooleanClause.Occur.SHOULD);	
 			} catch (Exception e) {
 				LOGGER.severe("Unable to use description: " + stringFilter(description));
 			}
 			
 		}
+		if(!relevantNarrative.isEmpty()){
+			try {
+				narrativeQuery = this.queryParser.parse(QueryParser.escape(relevantNarrative));
+			}catch(ArrayIndexOutOfBoundsException e) {
+				LOGGER.severe("Unable to use narrative: " + stringFilter(relevantNarrative));
+			}
+			
+			
+		}
+		
+		if (narrativeQuery != null) {
+			finalQuery.add(new BoostQuery(narrativeQuery,(float)1.2),BooleanClause.Occur.SHOULD);
+		}
 		
 		return finalQuery.build();
 	}
+	
+	
+	
+	private List<String> splitNarrativeIntoRelNotRel(String queryNarrative) {
+		// TODO Auto-generated method stub
+        StringBuilder relevantNarrative = new StringBuilder();
+        StringBuilder irrelevantNarrative = new StringBuilder();
+        List<String> splitNarrative = new ArrayList<>();
+
+        BreakIterator breakIterator = BreakIterator.getSentenceInstance();
+        breakIterator.setText(queryNarrative);
+        int index = 0;
+        while (breakIterator.next() != BreakIterator.DONE) {
+            String sentence = queryNarrative.substring(index, breakIterator.current());
+
+            if (!sentence.contains("not relevant") && !sentence.contains("irrelevant")) {
+                relevantNarrative.append(sentence.replaceAll(
+                        "a relevant document identifies|a relevant document could|a relevant document may|a relevant document must|a relevant document will|a document will|to be relevant|relevant documents|a document must|relevant|will contain|will discuss|will provide|must cite",
+                        ""));
+            } else {
+                irrelevantNarrative.append(sentence.replaceAll("are also not relevant|are not relevant|are irrelevant|is not relevant|not|NOT", ""));
+            }
+            index = breakIterator.current();
+        }
+        splitNarrative.add(relevantNarrative.toString());
+        splitNarrative.add(irrelevantNarrative.toString());
+        return splitNarrative;
+	}
+
 	
 	private String stringFilter(String str) {
 		str = str.toLowerCase().replace("\"", "").trim().replace("?", "");
@@ -126,7 +178,7 @@ public class QueryEngine {
 	private Map<String, Float> buildBoostMap() {
 		Map<String, Float> boost = new HashMap<>();
         boost.put("headline", (float) 1.0);
-        boost.put("text", (float) 0.5);
+        boost.put("text", (float) 0.9);
         return boost;
 	}
 	
