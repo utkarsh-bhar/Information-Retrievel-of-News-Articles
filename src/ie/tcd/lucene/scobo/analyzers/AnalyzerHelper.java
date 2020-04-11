@@ -50,7 +50,7 @@ public class AnalyzerHelper {
 			return new ScoboCustomAnalyzer();
 		} else {
 			System.out.println("No analyzer provided. Defaulting to ScoboCustomAnalyzer.");
-			return new ScoboCustomAnalyzer();
+			return new TeamScoboCustomAnalyzer(TeamScoboCustomAnalyzer.getDefaultStopSet());
 		}
 	}
 	

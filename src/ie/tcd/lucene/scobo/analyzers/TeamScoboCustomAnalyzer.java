@@ -1,5 +1,10 @@
 package ie.tcd.lucene.scobo.analyzers;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -14,6 +19,9 @@ import org.apache.lucene.analysis.en.EnglishPossessiveFilter;
 import org.apache.lucene.analysis.en.PorterStemFilter;
 import org.apache.lucene.analysis.miscellaneous.SetKeywordMarkerFilter;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
+import org.apache.lucene.analysis.synonym.SynonymGraphFilter;
+import org.apache.lucene.analysis.synonym.SynonymMap;
+import org.apache.lucene.util.CharsRef;
 import org.apache.lucene.analysis.snowball.SnowballFilter;
 import org.tartarus.snowball.ext.EnglishStemmer;
 import org.apache.lucene.analysis.core.FlattenGraphFilter;
@@ -178,6 +186,7 @@ public class TeamScoboCustomAnalyzer extends StopwordAnalyzerBase {
     			null
     		)
     	);
+    	result = new FlattenGraphFilter(new SynonymGraphFilter(result, buildSynonymMap(), true));
     	
     	result = new StopFilter(result, stopwords);
     	
@@ -195,4 +204,42 @@ public class TeamScoboCustomAnalyzer extends StopwordAnalyzerBase {
     protected TokenStream normalize(String stringName, TokenStream stream) {
     	return new LowerCaseFilter(stream);
     }
+    
+	private SynonymMap buildSynonymMap() {
+		SynonymMap map = new SynonymMap(null, null, 0);
+		try {
+            List<String> countriesList = getCountriesList();
+			final SynonymMap.Builder builder = new SynonymMap.Builder(true);
+			
+			for (String country: countriesList) {
+				builder.add(new CharsRef("country"), new CharsRef(country), true);
+				builder.add(new CharsRef("countries"), new CharsRef(country), true);
+			}
+
+			map = builder.build();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return map;
+	}
+	
+	private List<String> getCountriesList() {
+		List<String> countriesList = new ArrayList<String>();
+		InputStream is = getContextClassLoader().getResourceAsStream("countries");
+		InputStreamReader streamReader = new InputStreamReader(is, StandardCharsets.UTF_8);
+
+		try (BufferedReader br = new BufferedReader(streamReader)) {
+			String line;
+			while((line = br.readLine()) != null) {
+				countriesList.add(line);
+			}
+		} catch (Exception e) {
+			System.out.println("ERROR: " + e.getMessage());
+		}
+		return countriesList;
+	}
+	
+	private ClassLoader getContextClassLoader() {
+	    return Thread.currentThread().getContextClassLoader();
+	}
 }

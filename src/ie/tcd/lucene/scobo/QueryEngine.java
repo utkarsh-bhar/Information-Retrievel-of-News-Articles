@@ -155,6 +155,7 @@ public class QueryEngine {
 	
 	private String stringFilter(String str) {
 		str = str.toLowerCase();
+		// Some of these should really be regex
 		
 		return str.replaceAll("documents", "")
 			      .replaceAll("document", "")
@@ -173,6 +174,10 @@ public class QueryEngine {
 			      .replaceAll("find", "")
 			      .replaceAll("information", "")
 			      .replaceAll("\"", "")
+			      .replaceAll("u.s.", "US")
+			      .replaceAll("i.e.,", "")
+			      .replaceAll("\\(", "")
+			      .replaceAll("\\)", "")
 			      .replace("?", "").trim();
 	}
 	
