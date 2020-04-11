@@ -80,7 +80,9 @@ public class QueryEngine {
 		Query narrativeQuery = null;
 		List<String> splitNarrative = splitNarrativeIntoRelNotRel(queryObj.getQueryNarrative());
 		String relevantNarrative = splitNarrative.get(0).trim();
-		
+
+		QueryParser parserForText = new QueryParser("text", analyzer);
+
 		if (!title.isEmpty()) {
 			/*
 			 * If the title is in the form of "Ireland, peace talks",
@@ -91,35 +93,34 @@ public class QueryEngine {
 				String[] titleTokens = title.split(",");
 				for (String token : titleTokens) {
 					Query tokenQuery = this.queryParser.parse(QueryParser.escape(token));
-					finalQuery.add(new BoostQuery(tokenQuery,(float) 3.5), BooleanClause.Occur.SHOULD);
+					finalQuery.add(new BoostQuery(tokenQuery,(float) 3.0), BooleanClause.Occur.SHOULD);
 				}
 			} else {
 				Query titleQuery = this.queryParser.parse(QueryParser.escape(title));
-				finalQuery.add(new BoostQuery(titleQuery,(float) 4), BooleanClause.Occur.SHOULD);
+				finalQuery.add(new BoostQuery(titleQuery,(float) 3.5), BooleanClause.Occur.SHOULD);
 			}
 		}
 		
 		if (!description.isEmpty()) {
+			description = stringFilter(description);
+
 			try {
-				Query descriptionQuery = this.queryParser.parse(QueryParser.escape(stringFilter(description)));
-				finalQuery.add(new BoostQuery(descriptionQuery,(float) 1.7), BooleanClause.Occur.SHOULD);	
-			} catch (Exception e) {
-				LOGGER.severe("Unable to use description: " + stringFilter(description));
+				Query descriptionQuery = parserForText.parse(QueryParser.escape(description));
+				finalQuery.add(new BoostQuery(descriptionQuery,(float) 2.0), BooleanClause.Occur.SHOULD);	
+			} catch (ArrayIndexOutOfBoundsException e) {
+				LOGGER.severe("Unable to use description: " + description);
 			}
 			
 		}
 		if(!relevantNarrative.isEmpty()){
 			try {
-				narrativeQuery = this.queryParser.parse(QueryParser.escape(relevantNarrative));
-			}catch(ArrayIndexOutOfBoundsException e) {
+				narrativeQuery = parserForText.parse(QueryParser.escape(relevantNarrative));
+				if (narrativeQuery != null) {
+					finalQuery.add(new BoostQuery(narrativeQuery,(float)1.2),BooleanClause.Occur.SHOULD);
+				}
+			} catch(ArrayIndexOutOfBoundsException e) {
 				LOGGER.severe("Unable to use narrative: " + stringFilter(relevantNarrative));
 			}
-			
-			
-		}
-		
-		if (narrativeQuery != null) {
-			finalQuery.add(new BoostQuery(narrativeQuery,(float)1.2),BooleanClause.Occur.SHOULD);
 		}
 		
 		return finalQuery.build();
@@ -128,7 +129,6 @@ public class QueryEngine {
 	
 	
 	private List<String> splitNarrativeIntoRelNotRel(String queryNarrative) {
-		// TODO Auto-generated method stub
         StringBuilder relevantNarrative = new StringBuilder();
         StringBuilder irrelevantNarrative = new StringBuilder();
         List<String> splitNarrative = new ArrayList<>();
@@ -152,10 +152,9 @@ public class QueryEngine {
         splitNarrative.add(irrelevantNarrative.toString());
         return splitNarrative;
 	}
-
 	
 	private String stringFilter(String str) {
-		str = str.toLowerCase().replace("\"", "").trim().replace("?", "");
+		str = str.toLowerCase();
 		
 		return str.replaceAll("documents", "")
 			      .replaceAll("document", "")
@@ -172,7 +171,9 @@ public class QueryEngine {
 			      .replaceAll("provides", "")
 			      .replaceAll("provide", "")
 			      .replaceAll("find", "")
-			      .replaceAll("information", " ");
+			      .replaceAll("information", "")
+			      .replaceAll("\"", "")
+			      .replace("?", "").trim();
 	}
 	
 	private Map<String, Float> buildBoostMap() {
