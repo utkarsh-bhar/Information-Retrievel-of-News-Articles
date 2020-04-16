@@ -114,7 +114,7 @@ public class QueryEngine {
 		}
 		if(!relevantNarrative.isEmpty()){
 			try {
-				narrativeQuery = parserForText.parse(QueryParser.escape(relevantNarrative));
+				narrativeQuery = parserForText.parse(QueryParser.escape(stringFilter(relevantNarrative)));
 				if (narrativeQuery != null) {
 					finalQuery.add(new BoostQuery(narrativeQuery,(float)1.2),BooleanClause.Occur.SHOULD);
 				}
@@ -178,7 +178,9 @@ public class QueryEngine {
 			      .replaceAll("i.e.,", "")
 			      .replaceAll("\\(", "")
 			      .replaceAll("\\)", "")
-			      .replace("?", "").trim();
+			      .replace("?", "")
+			      .replace(",", "")
+			      .replace(".",  "").trim();
 	}
 	
 	private Map<String, Float> buildBoostMap() {
