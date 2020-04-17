@@ -93,11 +93,11 @@ public class QueryEngine {
 				String[] titleTokens = title.split(",");
 				for (String token : titleTokens) {
 					Query tokenQuery = this.queryParser.parse(QueryParser.escape(token));
-					finalQuery.add(new BoostQuery(tokenQuery,(float) 3.0), BooleanClause.Occur.SHOULD);
+					finalQuery.add(new BoostQuery(tokenQuery,(float) 25.0), BooleanClause.Occur.SHOULD);
 				}
 			} else {
 				Query titleQuery = this.queryParser.parse(QueryParser.escape(title));
-				finalQuery.add(new BoostQuery(titleQuery,(float) 3.5), BooleanClause.Occur.SHOULD);
+				finalQuery.add(new BoostQuery(titleQuery,(float) 23.0), BooleanClause.Occur.SHOULD);
 			}
 		}
 		
@@ -106,7 +106,7 @@ public class QueryEngine {
 
 			try {
 				Query descriptionQuery = parserForText.parse(QueryParser.escape(description));
-				finalQuery.add(new BoostQuery(descriptionQuery,(float) 2.0), BooleanClause.Occur.SHOULD);	
+				finalQuery.add(new BoostQuery(descriptionQuery,(float) 20.0), BooleanClause.Occur.SHOULD);	
 			} catch (ArrayIndexOutOfBoundsException e) {
 				LOGGER.severe("Unable to use description: " + description);
 			}
@@ -116,7 +116,7 @@ public class QueryEngine {
 			try {
 				narrativeQuery = parserForText.parse(QueryParser.escape(stringFilter(relevantNarrative)));
 				if (narrativeQuery != null) {
-					finalQuery.add(new BoostQuery(narrativeQuery,(float)1.2),BooleanClause.Occur.SHOULD);
+					finalQuery.add(new BoostQuery(narrativeQuery,(float)15.0),BooleanClause.Occur.SHOULD);
 				}
 			} catch(ArrayIndexOutOfBoundsException e) {
 				LOGGER.severe("Unable to use narrative: " + stringFilter(relevantNarrative));
@@ -185,8 +185,8 @@ public class QueryEngine {
 	
 	private Map<String, Float> buildBoostMap() {
 		Map<String, Float> boost = new HashMap<>();
-        boost.put("headline", (float) 1.0);
-        boost.put("text", (float) 0.9);
+        boost.put("headline", (float) 0.6);
+        boost.put("text", (float) 1.57);
         return boost;
 	}
 	

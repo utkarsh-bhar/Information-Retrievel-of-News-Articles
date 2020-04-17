@@ -50,19 +50,20 @@ public class AnalyzerHelper {
 			return new ScoboCustomAnalyzer();
 		} else {
 			System.out.println("No analyzer provided. Defaulting to ScoboCustomAnalyzer.");
-			return new TeamScoboCustomAnalyzer(TeamScoboCustomAnalyzer.getDefaultStopSet());
+			return new ScoboCustomAnalyzer();
+//			return new TeamScoboCustomAnalyzer(TeamScoboCustomAnalyzer.getDefaultStopSet());
 		}
 	}
 	
 	public static Similarity multiSimilarity() {
 		Similarity similarity[] = { 
-			new BM25Similarity(3, (float) 0.9),
+			new BM25Similarity((float) 0.7, (float) 0.75),
 			new DFRSimilarity(
 				new BasicModelIn(), 
 				new AfterEffectB(), 
 				new NormalizationH1()
 			),
-			new LMDirichletSimilarity(5000)
+			new LMDirichletSimilarity(8500)
 		};
 		
 		return (new MultiSimilarity(similarity));

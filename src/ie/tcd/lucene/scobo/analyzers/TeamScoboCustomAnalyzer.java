@@ -17,6 +17,7 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.en.EnglishPossessiveFilter;
 import org.apache.lucene.analysis.en.PorterStemFilter;
+import org.apache.lucene.analysis.miscellaneous.LengthFilter;
 import org.apache.lucene.analysis.miscellaneous.SetKeywordMarkerFilter;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.synonym.SynonymGraphFilter;
@@ -30,6 +31,7 @@ import org.apache.lucene.analysis.miscellaneous.WordDelimiterGraphFilter;
 public class TeamScoboCustomAnalyzer extends StopwordAnalyzerBase {
 	
 	private int maxLengthToken = 255;
+	private int minLengthToken = 4;
 	public static final CharArraySet ENGLISH_STOP_WORDS_SET;
 
 	static {
@@ -173,8 +175,18 @@ public class TeamScoboCustomAnalyzer extends StopwordAnalyzerBase {
     	final Tokenizer source = new StandardTokenizer();
     	TokenStream result = new EnglishPossessiveFilter(source);
     	result = new LowerCaseFilter(result);
-    	result = new TrimFilter(result);
+    	result = new StopFilter(result, stopwords);
+    	
+//    	result = new TrimFilter(result);
     	// result = new EnglishMinimalStemFilter(result);
+    	
+    	result = new LengthFilter(result, minLengthToken, maxLengthToken);
+    	
+    	if(!exclusionSet.isEmpty()) {
+    		result = new SetKeywordMarkerFilter(result, exclusionSet);
+    	}     
+    	
+    	result = new PorterStemFilter(result);
     	
     	result = new FlattenGraphFilter(
     		new WordDelimiterGraphFilter(
@@ -188,14 +200,10 @@ public class TeamScoboCustomAnalyzer extends StopwordAnalyzerBase {
     	);
     	result = new FlattenGraphFilter(new SynonymGraphFilter(result, buildSynonymMap(), true));
     	
-    	result = new StopFilter(result, stopwords);
     	
-    	if(!exclusionSet.isEmpty()) {
-    		result = new SetKeywordMarkerFilter(result, exclusionSet);
-    	}     
     	
-    	result = new SnowballFilter(result, new EnglishStemmer());
-    	result = new PorterStemFilter(result);
+//    	result = new SnowballFilter(result, new EnglishStemmer());
+    	
     	
     	return new TokenStreamComponents(source, result);
     }

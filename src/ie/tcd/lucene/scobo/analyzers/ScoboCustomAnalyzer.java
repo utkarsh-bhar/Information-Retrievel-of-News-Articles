@@ -16,6 +16,11 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.core.FlattenGraphFilter;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
+import org.apache.lucene.analysis.en.EnglishMinimalStemFilter;
+import org.apache.lucene.analysis.en.EnglishPossessiveFilter;
+import org.apache.lucene.analysis.en.KStemFilter;
+import org.apache.lucene.analysis.en.PorterStemFilter;
+import org.apache.lucene.analysis.miscellaneous.LengthFilter;
 import org.apache.lucene.analysis.miscellaneous.TrimFilter;
 import org.apache.lucene.analysis.miscellaneous.WordDelimiterGraphFilter;
 import org.apache.lucene.analysis.snowball.SnowballFilter;
@@ -39,9 +44,11 @@ public class ScoboCustomAnalyzer extends StopwordAnalyzerBase {
 	@Override
 	protected TokenStreamComponents createComponents(String s) {
 		final Tokenizer tokenizer = new StandardTokenizer();
+//		TokenStream tokenStream = new EnglishPossessiveFilter(tokenizer);
 		TokenStream tokenStream = new ClassicFilter(tokenizer);
 		tokenStream = new LowerCaseFilter(tokenStream);
 		tokenStream = new TrimFilter(tokenStream);
+		
 		tokenStream = new FlattenGraphFilter(
 			new WordDelimiterGraphFilter(
 				tokenStream, 
@@ -52,9 +59,13 @@ public class ScoboCustomAnalyzer extends StopwordAnalyzerBase {
 				null
 			)
 		);
-		tokenStream = new FlattenGraphFilter(new SynonymGraphFilter(tokenStream, buildSynonymMap(), true));
+		
+//		tokenStream = new FlattenGraphFilter(new SynonymGraphFilter(tokenStream, buildSynonymMap(), true));
 		tokenStream = new StopFilter(tokenStream, StopFilter.makeStopSet(Constants.STOP_WORDS_LIST, true));
+//		tokenStream = new PorterStemFilter(tokenStream);
 		tokenStream = new SnowballFilter(tokenStream, new EnglishStemmer());
+//		tokenStream = new KStemFilter(tokenStream);
+//		tokenStream = new EnglishMinimalStemFilter(tokenStream);
 		return new TokenStreamComponents(tokenizer, tokenStream);
 	}
 
@@ -87,7 +98,8 @@ public class ScoboCustomAnalyzer extends StopwordAnalyzerBase {
 				countriesList.add(line);
 			}
 		} catch (Exception e) {
-			System.out.println("ERROR: " + e.getLocalizedMessage());
+			LOGGER.severe("Exception when generating synonym map");
+			LOGGER.severe(e.getMessage());
 		}
 		return countriesList;
 	}
