@@ -97,16 +97,17 @@ public class QueryEngine {
 				}
 			} else {
 				Query titleQuery = this.queryParser.parse(QueryParser.escape(title));
-				finalQuery.add(new BoostQuery(titleQuery,(float) 23.0), BooleanClause.Occur.SHOULD);
+				finalQuery.add(new BoostQuery(titleQuery,(float) 25.0), BooleanClause.Occur.SHOULD);
 			}
 		}
 		
 		if (!description.isEmpty()) {
 			description = stringFilter(description);
-
 			try {
+				
 				Query descriptionQuery = parserForText.parse(QueryParser.escape(description));
-				finalQuery.add(new BoostQuery(descriptionQuery,(float) 20.0), BooleanClause.Occur.SHOULD);	
+				finalQuery.add(new BoostQuery(descriptionQuery,(float) 23.0), BooleanClause.Occur.SHOULD);	
+				
 			} catch (ArrayIndexOutOfBoundsException e) {
 				LOGGER.severe("Unable to use description: " + description);
 			}
@@ -114,6 +115,15 @@ public class QueryEngine {
 		}
 		if(!relevantNarrative.isEmpty()){
 			try {
+				relevantNarrative = stringFilter(relevantNarrative);
+				
+				if (relevantNarrative.contains(".")) {
+					String[] narrToken = relevantNarrative.split(".");
+					for (String token : narrToken) {					
+						Query tokenQuery = parserForText.parse(QueryParser.escape(token));
+						finalQuery.add(new BoostQuery(tokenQuery,(float) 15.0), BooleanClause.Occur.SHOULD);
+					}
+				}
 				narrativeQuery = parserForText.parse(QueryParser.escape(stringFilter(relevantNarrative)));
 				if (narrativeQuery != null) {
 					finalQuery.add(new BoostQuery(narrativeQuery,(float)15.0),BooleanClause.Occur.SHOULD);
@@ -179,7 +189,7 @@ public class QueryEngine {
 			      .replaceAll("\\(", "")
 			      .replaceAll("\\)", "")
 			      .replace("?", "")
-			      .replace(",", "")
+//			      .replace(",", "")
 			      .replace(".",  "").trim();
 	}
 	
